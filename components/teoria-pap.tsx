@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowUpRight, BookOpen, CheckCircle2, Quote, Zap, Target, Lightbulb, ShieldAlert, ChevronRight, ChevronLeft } from 'lucide-react'
+import { ArrowUpRight, BookOpen, CheckCircle2, Quote, Zap, Target, Lightbulb, ShieldAlert, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react'
 import { teoriaData } from '../data/teoria'
 
 interface TeoriaProps {
@@ -108,7 +108,7 @@ export function TeoriaPap({ onGoToApp, onGoToGoogle }: TeoriaProps) {
   const handlePrepareSolution = () => {
     if (isPreparing) return;
     setIsPreparing(true);
-    setTimeout(() => onGoToApp(), 5000);
+    setTimeout(() => onGoToApp(), 3000); // <-- Reduzido para 2.5s (Tempo perfeito!)
   };
 
   return (
@@ -687,16 +687,14 @@ export function TeoriaPap({ onGoToApp, onGoToGoogle }: TeoriaProps) {
             </section>
           )}
 
-          {/* PASSO 6: O CLÍMAX (Diagnóstico Concluído e Botão Alinhado) */}
+          {/* PASSO 6: O CLÍMAX (Checklist e Botão com Fill Animation) */}
           {step === 6 && (
             <section className="w-full flex flex-col items-center justify-center min-h-[60vh] animate-in fade-in zoom-in-95 duration-700 px-4">
               
-              {/* Título Principal Limpo */}
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-[#6B23CA] mb-12 md:mb-14 text-center drop-shadow-sm">
                 Diagnóstico Concluído
               </h2>
 
-              {/* Checklist Visual (Caixas Brancas em destaque no fundo) */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8 w-full max-w-4xl mb-16 md:mb-20">
                 {[
                   { text: "Fundamentação Validada", icon: <CheckCircle2 size={26} strokeWidth={2.5} /> },
@@ -718,19 +716,36 @@ export function TeoriaPap({ onGoToApp, onGoToGoogle }: TeoriaProps) {
                 ))}
               </div>
 
-              {/* Botão de Ação Clímax (Largura dinâmica e frase numa só linha) */}
+              {/* Botão com Barra de Progresso Interna (Fill Animation) */}
               <button 
-                onClick={() => setStep(7)} // Adapta o número do step ou a função de fecho que precisas aqui
-                className="group relative flex flex-col items-center justify-center px-10 md:px-16 py-6 md:py-7 rounded-[3rem] bg-[#FF7A00] text-white shadow-[0_15px_30px_rgba(255,122,0,0.25)] transition-all duration-300 hover:scale-105 hover:shadow-[0_20px_45px_rgba(255,122,0,0.4)] border-[6px] border-white outline-none w-auto max-w-fit"
+                onClick={handlePrepareSolution}
+                disabled={isPreparing}
+                className={`group relative flex flex-col items-center justify-center px-10 md:px-16 py-6 md:py-7 rounded-[3rem] bg-[#FF7A00] text-white shadow-[0_15px_30px_rgba(255,122,0,0.25)] transition-all duration-300 border-[6px] border-white outline-none w-auto max-w-fit overflow-hidden
+                  ${isPreparing ? 'scale-105 shadow-[0_20px_45px_rgba(255,122,0,0.4)] cursor-wait' : 'hover:scale-105 hover:shadow-[0_20px_45px_rgba(255,122,0,0.4)]'}
+                `}
               >
-                <div className="flex items-center justify-center mb-1.5 md:mb-2">
-                  <span className="text-3xl md:text-4xl lg:text-5xl font-black tracking-wide whitespace-nowrap">
-                    Preparar Solução
+                {/* A animação de preenchimento a Roxo (3 segundos) */}
+                <div 
+                  className="absolute top-0 left-0 h-full bg-[#6B23CA] transition-all ease-linear"
+                  style={{ 
+                    width: isPreparing ? '100%' : '0%', 
+                    transitionDuration: isPreparing ? '3000ms' : '0ms' 
+                  }}
+                />
+
+                {/* CONTEÚDO (O z-10 garante que o texto fica por cima da onda roxa) */}
+                <div className="relative z-10 flex flex-col items-center transition-all duration-300">
+                  <div className="flex items-center justify-center mb-1.5 md:mb-2">
+                    <span className="text-3xl md:text-4xl lg:text-5xl font-black tracking-wide whitespace-nowrap">
+                      {isPreparing ? 'A Formular...' : 'Preparar Solução'}
+                    </span>
+                  </div>
+                  <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.25em] whitespace-nowrap
+                    ${isPreparing ? 'opacity-100 animate-pulse' : 'opacity-90 group-hover:animate-pulse text-white/90'}
+                  `}>
+                    {isPreparing ? 'A ativar plataforma PharmaMedia...' : '(Agitar antes de apresentar)'}
                   </span>
                 </div>
-                <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.25em] opacity-90 group-hover:animate-pulse text-white/90 whitespace-nowrap">
-                  (Agitar antes de apresentar)
-                </span>
               </button>
 
             </section>
