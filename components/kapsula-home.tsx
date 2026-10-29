@@ -37,7 +37,8 @@ const campaignMeta: Record<string, { icon: any, categoria: string }> = {
 const filterCategories = ['Todos', 'Prevenção', 'Bem-Estar', 'Sazonal']
 
 export function KapsulaHome() {
-  const [view, setView] = useState<'google' | 'splash' | 'intro' | 'app'>('google')
+  // Retirámos o 'splash' daqui
+  const [view, setView] = useState<'google' | 'intro' | 'app'>('google')
   const [activeId, setActiveId] = useState<string | null>(null)
   const activeCampanha = campanhasData.find(c => c.id === activeId)
   const [toastFact, setToastFact] = useState<string | null>(null)
@@ -45,11 +46,9 @@ export function KapsulaHome() {
   // Estado para os Filtros do Lookbook
   const [activeFilter, setActiveFilter] = useState('Todos')
 
+  // AGORA VAI DIRETO PARA A TEORIA!
   const handleSearchTrigger = () => {
-    setView('splash')
-    setTimeout(() => {
-      setView('intro')
-    }, 1200)
+    setView('intro')
   }
 
   const handlePilulaClick = () => {
@@ -70,22 +69,6 @@ export function KapsulaHome() {
   // Vista 1: Google Search
   if (view === 'google') {
     return <GoogleSearch onSearchSubmit={handleSearchTrigger} />
-  }
-
-  // Vista 2: Splash / Fade-in
-  if (view === 'splash') {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f4f1e9] text-[#6B23CA] animate-in fade-in zoom-in duration-700">
-        <div className="text-center">
-          <img
-            src="/logo-pharmamedia.png"
-            alt="Logótipo PharmaMedia"
-            className="h-16 w-auto mx-auto mb-4 drop-shadow-md"
-          />
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#FF7A00]">A carregar portal institucional...</p>
-        </div>
-      </main>
-    )
   }
 
   // Vista 3: Teoria PAP

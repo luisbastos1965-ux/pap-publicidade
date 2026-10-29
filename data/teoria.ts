@@ -65,8 +65,7 @@ export const teoriaData = {
   swot: {
     forcas: [
       "Campanhas chave-na-mão prontas a implementar em 24h.",
-      "Abordagem 360º (Físico, Digital e Clínico).",
-      "Equipa multidisciplinar com forte componente criativa e pedagógica."
+      "Abordagem 360º (Físico, Digital e Clínico)."
     ],
     fraquezas: [
       "Agência em fase de lançamento (marca nova no mercado B2B).",
