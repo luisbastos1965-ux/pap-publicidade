@@ -5,6 +5,7 @@ import { ArrowDown, ArrowUpRight, Beaker, Boxes, ChevronRight, HeartPulse, Spark
 import { campanhasData } from '../data/campanhas'
 import { GoogleSearch } from './google-search'
 import { TeoriaPap } from './teoria-pap'
+import { CampanhaModal } from './campanha-modal' // Ajusta o caminho conforme necessário
 
 const pillars = [
   { icon: Sparkles, number: '01', title: 'Publicidade', text: 'Campanhas que param o scroll e tornam a literacia em saúde impossível de ignorar.' },
@@ -35,12 +36,19 @@ const campaignMeta: Record<string, { icon: any, categoria: string }> = {
 }
 const filterCategories = ['Todos', 'Prevenção', 'Bem-Estar', 'Sazonal']
 
+// Abreviaturas para comparar com o mês atual (funciona com "JAN", "Jan" ou "Janeiro")
+const mesesAbrev = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+const mesParaIndice = (mes?: string) =>
+  mesesAbrev.indexOf((mes || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().slice(0, 3))
+
 export function KapsulaHome() {
   const [view, setView] = useState<'google' | 'intro' | 'app'>('google')
   const [activeId, setActiveId] = useState<string | null>(null)
   const activeCampanha = campanhasData.find(c => c.id === activeId)
   const [toastFact, setToastFact] = useState<string | null>(null)
   const [activeFilter, setActiveFilter] = useState('Todos')
+  const [currentMonth, setCurrentMonth] = useState<number | null>(null)
+  useEffect(() => { setCurrentMonth(new Date().getMonth()) }, [])
 
   // ESTADO PARA O BOTÃO FLUTUANTE
   const [activeSection, setActiveSection] = useState('top')
@@ -114,9 +122,9 @@ export function KapsulaHome() {
   if (activeSection === 'metodo') nextSectionLink = '#lookbook';
   if (activeSection === 'lookbook') nextSectionLink = '#contacto';
 
-  const filteredCampanhas = campanhasData.filter(c =>
-    activeFilter === 'Todos' || campaignMeta[c.id]?.categoria === activeFilter
-  )
+  // Já não removemos cartões: só vemos se correspondem ao filtro ativo
+  const isMatch = (id: string) =>
+    activeFilter === 'Todos' || campaignMeta[id]?.categoria === activeFilter
 
   // =========================================================================
   // EM VEZ DE 'IF / RETURN', ENVOLVEMOS TUDO PARA A CORTINA PODER SOBREPOR-SE
@@ -321,52 +329,63 @@ export function KapsulaHome() {
 
               {/* GRELHA DE CAMPANHAS */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6 relative min-h-[500px]">
-                {filteredCampanhas.map((campanha, index) => {
+                {campanhasData.map((campanha, index) => {
                   const Meta = campaignMeta[campanha.id] || { icon: Sparkles };
                   const IconComponent = Meta.icon;
                   const delay = (index % 4) * 100;
+                  const awake = isMatch(campanha.id)
+                  const isCurrentMonth = currentMonth !== null && mesParaIndice(campanha.mes) === currentMonth
 
                   return (
                     <button
                       key={campanha.id}
                       onClick={() => setActiveId(campanha.id)}
-                      className={`group relative flex min-h-[280px] flex-col justify-between overflow-hidden rounded-[2rem] p-7 text-left transition-all duration-500 ease-out hover:-translate-y-3 ${campanha.cor} ${campanha.textoCor} animate-in zoom-in-95 fade-in shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-white/10`}
+                      className={`group relative flex aspect-square flex-col justify-between overflow-hidden rounded-[2rem] p-7 text-left transition-all duration-500 ease-out hover:-translate-y-3 ${campanha.cor} ${campanha.textoCor} animate-in zoom-in-95 fade-in border border-white/10 ${
+                        awake
+                          ? 'shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)]'
+                          : 'grayscale opacity-40 shadow-none hover:grayscale-0 hover:opacity-100'
+                      }`}
                       style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}
                     >
                       {/* Sobreposições e Efeitos */}
-                      <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-black/20 pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/10 pointer-events-none" />
                       <div 
                         className="absolute inset-0 rounded-[2rem] opacity-0 transition-opacity duration-700 group-hover:opacity-100 pointer-events-none -z-10"
                         style={{ boxShadow: `0 20px 40px ${campanha.corTematicaHex}50` }} 
                       />
-                      <div className="absolute -bottom-8 -right-8 z-0 opacity-[0.06] transition-all duration-[1500ms] ease-out group-hover:rotate-12 group-hover:scale-[1.3] group-hover:opacity-[0.15] pointer-events-none">
-                        <IconComponent size={200} strokeWidth={1.5} />
+                      <div className={`absolute -bottom-10 -right-10 z-0 transition-all duration-[1500ms] ease-out group-hover:rotate-12 group-hover:scale-[1.3] group-hover:opacity-[0.18] pointer-events-none ${awake ? 'opacity-[0.11]' : 'opacity-0'}`}>
+                        <IconComponent size={220} strokeWidth={1.5} />
                       </div>
                       
-                      {/* Topo do Cartão: Apenas Mês, puxado à direita */}
-                      <div className="relative z-10 flex w-full items-center justify-end text-[10px] font-black uppercase tracking-[.2em]">
-                        <div className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/20 shadow-sm">
-                          <span className="inline-block h-2 w-2 rounded-full shadow-sm animate-pulse" style={{ backgroundColor: campanha.corTematicaHex || '#fff' }} />
-                          <span>{campanha.mes}</span>
-                        </div>
+                      {/* Topo do Cartão: mês grande, estilo calendário */}
+                      <div className="relative z-10 flex w-full items-center justify-between">
+                        <span className="text-5xl md:text-6xl font-black uppercase leading-none tracking-[-0.04em] opacity-40">
+                          {campanha.mes}
+                        </span>
+                        {isCurrentMonth && (
+                          <span className="relative flex h-3 w-3" title="Mês atual" aria-label="Mês atual">
+                            {awake && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-70" />}
+                            <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-[#6B23CA] bg-white shadow-sm" />
+                          </span>
+                        )}
                       </div>
-                      
-                      {/* Base do Cartão: Título fixo (sem animação de hover) */}
-                      <div className="relative z-10 mt-auto pt-10">
-                        <h3 className="text-2xl font-black leading-[1.05] tracking-tight md:text-[1.7rem] drop-shadow-sm">
+
+                      {/* Base do Cartão: categoria + título */}
+                      <div className="relative z-10 mt-auto pt-10 pr-10">
+                        <h3 className="text-2xl font-black leading-[1.05] tracking-tight md:text-[1.4rem] drop-shadow-sm">
                           {campanha.tema}
                         </h3>
                       </div>
+
+                      {/* Seta que indica que o cartão é clicável */}
+                      <ArrowUpRight
+                        size={24}
+                        strokeWidth={2.5}
+                        className="absolute bottom-7 right-7 z-10 -translate-x-1 translate-y-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100"
+                      />
                     </button>
                   )
                 })}
-                
-                {filteredCampanhas.length === 0 && (
-                  <div className="col-span-full flex flex-col items-center justify-center py-32 text-[#6B23CA]/40 animate-in fade-in bg-white/50 backdrop-blur-sm rounded-[2rem] border-2 border-dashed border-[#6B23CA]/20">
-                    <Sparkles size={48} className="mb-4 opacity-50" />
-                    <p className="text-lg font-black tracking-tight">Nenhuma cápsula encontrada.</p>
-                  </div>
-                )}
               </div>
 
               {/* FOOTER DA SECÇÃO: Canto Inferior Direito após os cartões */}
@@ -436,7 +455,7 @@ export function KapsulaHome() {
           </footer>
 
           {/* BOTÃO FLUTUANTE CONTÍNUO (Foge da caixa de factos e navega até ao fim!) */}
-          <div className={`fixed z-[99] transition-all duration-700 ease-in-out ${activeSection === 'top'
+          <div className={`fixed ${activeCampanha ? 'z-40' : 'z-[99]'} transition-all duration-700 ease-in-out ${activeSection === 'top'
               ? `right-8 md:right-12 lg:right-20 ${toastFact
                 ? 'bottom-48 md:bottom-48 lg:bottom-52'
                 : 'bottom-10 md:bottom-12 lg:bottom-16'
@@ -485,120 +504,12 @@ export function KapsulaHome() {
             </div>
           )}
 
-          {/* MODAL DA CAMPANHA (BULAS) */}
+          {/* MODAL DA CAMPANHA (BULAS) ISOLADO */}
           {activeCampanha && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#6B23CA]/90 p-4 md:p-6 backdrop-blur-lg transition-all animate-in fade-in duration-300">
-              <div className="relative flex h-[95vh] md:h-[90vh] w-full max-w-7xl flex-col overflow-hidden rounded-[2.5rem] bg-[#f4f1e9] shadow-[0_30px_60px_rgba(0,0,0,0.4)] animate-in zoom-in-95 duration-500">
-                <div className={`flex shrink-0 items-start justify-between px-8 py-10 md:px-12 md:py-12 ${activeCampanha.cor} ${activeCampanha.textoCor} relative overflow-hidden`}>
-                  <div className="absolute top-0 right-0 opacity-10 scale-150 -translate-y-1/4 translate-x-1/4 pointer-events-none">
-                    <HeartPulse size={400} strokeWidth={1} />
-                  </div>
-                  <div className="relative z-10 max-w-4xl">
-                    <div className="flex flex-wrap items-center gap-3 text-[10px] md:text-xs font-black uppercase tracking-[.2em] opacity-90 mb-4">
-                      <span className="flex items-center gap-2 bg-black/10 px-3 py-1.5 rounded-full backdrop-blur-md">
-                        <span className="inline-block h-2 w-2 rounded-full shadow-sm" style={{ backgroundColor: activeCampanha.corTematicaHex }} />
-                        Cápsula {activeCampanha.mes}
-                      </span>
-                      <span className="bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/20">
-                        {activeCampanha.tomComunicacao}
-                      </span>
-                    </div>
-                    <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-[1.05] drop-shadow-md">{activeCampanha.tema}</h2>
-                  </div>
-                  <button onClick={() => setActiveId(null)} className="relative z-10 rounded-full bg-black/10 p-3 md:p-4 transition-all hover:bg-black/20 hover:scale-105 hover:rotate-90">
-                    <X size={24} />
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-8 md:p-12 text-[#6B23CA] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
-                  <div className="grid gap-12 lg:grid-cols-3">
-
-                    <div className="space-y-10 lg:col-span-1 animate-in slide-in-from-bottom-8 fade-in duration-700 fill-mode-both" style={{ animationDelay: '100ms' }}>
-                      <div>
-                        <h3 className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-[.15em]" style={{ color: activeCampanha.corTematicaHex }}>
-                          <Target size={18} /> O Alvo
-                        </h3>
-                        <div className="bg-white p-5 rounded-2xl border border-[#6B23CA]/5 shadow-sm">
-                          <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-[#FF7A00]">Local de Ação</p>
-                          <p className="mb-4 text-sm font-black text-[#6B23CA]">{activeCampanha.localAcao}</p>
-                          <div className="h-px w-full bg-[#6B23CA]/10 mb-4"></div>
-                          <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-[#FF7A00]">Público</p>
-                          <p className="text-sm leading-relaxed text-[#4C1D95] font-medium">{activeCampanha.publicoAlvo}</p>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-[.15em]" style={{ color: activeCampanha.corTematicaHex }}>
-                          <TrendingUp size={18} /> Impacto (ROI)
-                        </h3>
-                        <p className="mb-6 text-sm leading-relaxed text-[#4C1D95] font-medium pl-2 border-l-2 border-[#FF7A00]">{activeCampanha.roi}</p>
-                        <div className="relative rounded-2xl bg-[#6B23CA] p-6 text-[#f4f1e9] shadow-lg overflow-hidden group">
-                          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
-                          <p className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest" style={{ color: activeCampanha.corTematicaHex }}>
-                            <Sparkles size={14} /> Pitch de Vendas
-                          </p>
-                          <p className="text-sm font-serif italic leading-relaxed text-white/90 relative z-10">&ldquo;{activeCampanha.pitch}&rdquo;</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-6 lg:col-span-2 lg:grid-cols-2">
-                      <div className="rounded-3xl border-2 border-[#6B23CA]/10 bg-white p-7 shadow-sm transition-all hover:shadow-md hover:border-[#6B23CA]/20 animate-in slide-in-from-bottom-8 fade-in duration-700 fill-mode-both" style={{ animationDelay: '200ms' }}>
-                        <h3 className="mb-6 flex items-center gap-2 text-sm font-black uppercase tracking-[.15em]" style={{ color: activeCampanha.corTematicaHex }}>
-                          <Boxes size={20} strokeWidth={2.5} /> Pack Físico
-                        </h3>
-                        <ul className="space-y-4 text-sm font-medium text-[#4C1D95]">
-                          {activeCampanha.packFisico?.map((item, index) => (
-                            <li key={index} className="flex gap-3 items-start">
-                              <div className="mt-1 shrink-0 h-2 w-2 rounded-full" style={{ backgroundColor: activeCampanha.corTematicaHex }} />
-                              <span className="leading-snug">{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="rounded-3xl border-2 border-[#6B23CA]/10 bg-white p-7 shadow-sm transition-all hover:shadow-md hover:border-[#6B23CA]/20 animate-in slide-in-from-bottom-8 fade-in duration-700 fill-mode-both" style={{ animationDelay: '300ms' }}>
-                        <h3 className="mb-6 flex items-center gap-2 text-sm font-black uppercase tracking-[.15em]" style={{ color: activeCampanha.corTematicaHex }}>
-                          <Sparkles size={20} strokeWidth={2.5} /> Pack Digital
-                        </h3>
-                        <ul className="space-y-4 text-sm font-medium text-[#4C1D95]">
-                          {activeCampanha.packDigital?.map((item, index) => (
-                            <li key={index} className="flex gap-3 items-start">
-                              <div className="mt-1 shrink-0 h-2 w-2 rounded-full" style={{ backgroundColor: activeCampanha.corTematicaHex }} />
-                              <span className="leading-snug">{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="rounded-3xl border-2 border-[#FF7A00]/20 bg-gradient-to-br from-white to-[#FF7A00]/5 p-7 lg:col-span-2 shadow-sm animate-in slide-in-from-bottom-8 fade-in duration-700 fill-mode-both" style={{ animationDelay: '400ms' }}>
-                        <h3 className="mb-6 flex items-center gap-2 text-sm font-black uppercase tracking-[.15em] text-[#FF7A00]">
-                          <HeartPulse size={20} strokeWidth={2.5} /> Valor Clínico & Extensão
-                        </h3>
-                        <div className="grid gap-8 md:grid-cols-2">
-                          <ul className="space-y-4 text-sm font-medium text-[#4C1D95]">
-                            {activeCampanha.packClinico?.map((item, index) => (
-                              <li key={index} className="flex gap-3 items-start">
-                                <div className="mt-0.5 shrink-0 flex items-center justify-center h-4 w-4 rounded-md bg-[#FF7A00] text-white font-bold text-[10px]">+</div>
-                                <span className="leading-snug">{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-
-                          <div className="rounded-2xl border border-[#FF7A00]/20 bg-white p-6 text-sm text-[#4C1D95] shadow-inner relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-[#FF7A00]"></div>
-                            <span className="mb-3 flex items-center gap-2 font-black text-[#FF7A00] uppercase tracking-widest text-[10px]">
-                              <Activity size={14} /> Na Comunidade
-                            </span>
-                            <p className="leading-relaxed font-medium">{activeCampanha.extensaoComunidade}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <CampanhaModal 
+              campanha={activeCampanha} 
+              onClose={() => setActiveId(null)} 
+            />
           )}
         </main>
       )}
