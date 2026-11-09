@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowDown, ArrowUpRight, Beaker, Boxes, ChevronRight, HeartPulse, Sparkles, Target, TrendingUp, X, Brain, Smile, Activity, Wind, Scale, Sun, Plane, BookOpen, Ribbon, Droplet, Snowflake } from 'lucide-react'
+import { ArrowDown, ArrowUpRight, Beaker, Boxes, ChevronRight, HeartPulse, Sparkles, Target, TrendingUp, X, Brain, Smile, Activity, Wind, Scale, Sun, Plane, BookOpen, Ribbon, Droplet, Snowflake, Download } from 'lucide-react'
 import { campanhasData } from '../data/campanhas'
 import { GoogleSearch } from './google-search'
 import { TeoriaPap } from './teoria-pap'
-import { CampanhaModal } from './campanha-modal' // Ajusta o caminho conforme necessário
+import { CampanhaModal } from './campanha-modal'
 
 const pillars = [
   { icon: Sparkles, number: '01', title: 'Publicidade', text: 'Campanhas que param o scroll e tornam a literacia em saúde impossível de ignorar.' },
@@ -36,7 +36,6 @@ const campaignMeta: Record<string, { icon: any, categoria: string }> = {
 }
 const filterCategories = ['Todos', 'Prevenção', 'Bem-Estar', 'Sazonal']
 
-// Abreviaturas para comparar com o mês atual (funciona com "JAN", "Jan" ou "Janeiro")
 const mesesAbrev = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
 const mesParaIndice = (mes?: string) =>
   mesesAbrev.indexOf((mes || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().slice(0, 3))
@@ -50,12 +49,7 @@ export function KapsulaHome() {
   const [currentMonth, setCurrentMonth] = useState<number | null>(null)
   useEffect(() => { setCurrentMonth(new Date().getMonth()) }, [])
 
-  // ESTADO PARA O BOTÃO FLUTUANTE
   const [activeSection, setActiveSection] = useState('top')
-
-  // =========================================================================
-  // ✨ NOVO: O "CÉREBRO" DA TRANSIÇÃO CINEMATOGRÁFICA
-  // =========================================================================
   const [transitionState, setTransitionState] = useState<'idle' | 'start' | 'in' | 'out'>('idle')
 
   const changeView = (targetView: 'google' | 'intro' | 'app') => {
@@ -64,7 +58,6 @@ export function KapsulaHome() {
     window.scrollTo(0, 0);
   }
 
-  // Atalho para a pesquisa do Google usando o novo motor de transição
   const handleSearchTrigger = () => changeView('intro')
 
   const handlePilulaClick = () => {
@@ -73,7 +66,6 @@ export function KapsulaHome() {
     setTimeout(() => setToastFact(null), 6000)
   }
 
-  // Modais e Scrolls
   useEffect(() => {
     if (activeCampanha || transitionState !== 'idle') {
       document.body.style.overflow = 'hidden'
@@ -83,9 +75,6 @@ export function KapsulaHome() {
     return () => { document.body.style.overflow = 'unset' }
   }, [activeCampanha, transitionState])
 
-  // =========================================================================
-  // DETETOR DE SCROLL (Agora deteta também o Lookbook)
-  // =========================================================================
   useEffect(() => {
     const handleScroll = () => {
       const metodoEl = document.getElementById('metodo');
@@ -95,16 +84,11 @@ export function KapsulaHome() {
         const metodoRect = metodoEl.getBoundingClientRect();
         const lookbookRect = lookbookEl.getBoundingClientRect();
 
-        // Verifica primeiro se já chegámos ao Lookbook
         if (lookbookRect.top <= window.innerHeight / 2) {
           setActiveSection('lookbook');
-        }
-        // Se não, verifica se estamos no Método
-        else if (metodoRect.top <= window.innerHeight / 2) {
+        } else if (metodoRect.top <= window.innerHeight / 2) {
           setActiveSection('metodo');
-        }
-        // Se nenhuma das duas, estamos no topo
-        else {
+        } else {
           setActiveSection('top');
         }
       }
@@ -114,38 +98,26 @@ export function KapsulaHome() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Lógica do botão consoante a secção:
-  const isOrangeTheme = activeSection === 'metodo'; // Fica laranja APENAS no método
+  const isOrangeTheme = activeSection === 'metodo';
 
-  // Define para onde o botão vai apontar a seguir
   let nextSectionLink = '#metodo';
   if (activeSection === 'metodo') nextSectionLink = '#lookbook';
   if (activeSection === 'lookbook') nextSectionLink = '#contacto';
 
-  // Já não removemos cartões: só vemos se correspondem ao filtro ativo
   const isMatch = (id: string) =>
     activeFilter === 'Todos' || campaignMeta[id]?.categoria === activeFilter
 
-  // =========================================================================
-  // EM VEZ DE 'IF / RETURN', ENVOLVEMOS TUDO PARA A CORTINA PODER SOBREPOR-SE
-  // =========================================================================
   return (
     <>
-      {/* JANELA 1: GOOGLE */}
       {view === 'google' && <GoogleSearch onSearchSubmit={handleSearchTrigger} />}
-
-      {/* JANELA 2: TEORIA */}
       {view === 'intro' && <TeoriaPap onGoToApp={() => changeView('app')} onGoToGoogle={() => changeView('google')} />}
 
-      {/* JANELA 3: APP (PHARMAMEDIA HOME) */}
       {view === 'app' && (
         <main className="min-h-screen bg-[#f4f1e9] text-[#6B23CA] relative animate-in fade-in duration-500">
 
-          {/* NAVEGAÇÃO */}
           <nav className="mx-auto flex w-full max-w-[1400px] items-center justify-between px-6 py-6 md:px-10 lg:px-16 relative z-50">
             <div></div>
             <div className="flex items-center">
-              {/* ✨ Ao clicar, usa a nova transição para regressar à Teoria! */}
               <button
                 onClick={() => changeView('intro')}
                 className="group flex items-center transition-all duration-300 hover:scale-105"
@@ -160,22 +132,37 @@ export function KapsulaHome() {
             </div>
           </nav>
 
-          {/* HERO SECTION */}
           <section id="top" className="relative mx-auto grid min-h-[calc(100vh-120px)] w-full max-w-[1400px] items-center gap-12 px-6 pb-12 pt-0 md:px-10 lg:grid-cols-[1.05fr_.95fr] lg:px-16 lg:pb-16">
             <div className="relative z-10 max-w-3xl flex flex-col justify-center h-full">
               <h1 className="text-[clamp(4.2rem,9vw,9.5rem)] font-black leading-[0.95] tracking-[-0.07em] text-[#6B23CA] animate-in fade-in slide-in-from-left-4 duration-700">
                 Rigor que<br />
-                <span className="text-[#FF7A00]">
-                  ganha<br />
-                  vida.
-                </span>
+                <span className="text-[#FF7A00]">ganha<br />vida.</span>
               </h1>
-              <p className="my-8 md:my-10 max-w-lg text-[1.2rem] leading-relaxed text-[#4C1D95] md:text-xl font-medium animate-in fade-in slide-in-from-left-4 duration-700 delay-100 fill-mode-both">
+              <p className="my-8 max-w-lg text-[1.2rem] leading-relaxed text-[#4C1D95] md:text-xl font-medium animate-in fade-in slide-in-from-left-4 duration-700 delay-100 fill-mode-both">
                 Campanhas de saúde <em className="font-serif italic font-bold">chave-na-mão</em> para farmácias que querem comunicar melhor, cuidar mais e crescer com propósito.
               </p>
+
+              {/* ✨ MÉTRICAS DE AGÊNCIA (Impact Counter) */}
+              <div className="mt-4 flex flex-wrap gap-6 md:gap-10 animate-in fade-in slide-in-from-left-4 duration-700 delay-300 fill-mode-both">
+                <div className="flex flex-col">
+                  <span className="text-3xl md:text-5xl font-black text-[#FF7A00]">12</span>
+                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-[#4C1D95]/60 mt-1">Campanhas Anuais</span>
+                </div>
+                <div className="w-[2px] bg-[#6B23CA]/10 rounded-full my-2"></div>
+                <div className="flex flex-col">
+                  <span className="text-3xl md:text-5xl font-black text-[#FF7A00]">48<span className="text-[#6B23CA]">+</span></span>
+                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-[#4C1D95]/60 mt-1">Semanas de Conteúdo</span>
+                </div>
+                <div className="w-[2px] bg-[#6B23CA]/10 rounded-full my-2"></div>
+                <div className="flex flex-col">
+                  <span className="text-3xl md:text-5xl font-black text-[#FF7A00]">100<span className="text-[#6B23CA]">%</span></span>
+                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-[#4C1D95]/60 mt-1">Foco em Literacia</span>
+                </div>
+              </div>
+
             </div>
 
-            <div className="relative flex min-h-[400px] flex-col items-center justify-center lg:min-h-[500px] animate-in fade-in zoom-in-95 duration-1000 delay-300 fill-mode-both">
+            <div className="relative flex min-h-[400px] flex-col items-center justify-center lg:min-h-[500px] animate-in fade-in zoom-in-95 duration-1000 delay-500 fill-mode-both">
               <div onClick={handlePilulaClick} className="group relative cursor-pointer" title="Clique para descobrir uma ideia">
                 <style dangerouslySetInnerHTML={{
                   __html: `
@@ -201,90 +188,67 @@ export function KapsulaHome() {
             </div>
           </section>
 
-          {/* SECÇÃO MÉTODO - REDESIGN "AGÊNCIA PREMIUM" (Compactado para caber num ecrã normal) */}
           <section id="metodo" className="relative min-h-screen bg-[#6B23CA] px-6 py-12 lg:py-16 flex flex-col justify-center overflow-hidden">
-
-            {/* Luzes de fundo */}
             <div className="absolute -left-[10%] top-[20%] h-[600px] w-[600px] rounded-full bg-[#FF7A00] opacity-[0.04] blur-[120px] pointer-events-none"></div>
             <div className="absolute right-[5%] bottom-[10%] h-[400px] w-[400px] rounded-full bg-[#8B48E6] opacity-[0.2] blur-[100px] pointer-events-none"></div>
 
             <div className="mx-auto w-full max-w-[1400px] relative z-10">
-
-              {/* TÍTULO PRINCIPAL (Com mais respiro na margem inferior: mb-16 lg:mb-20) */}
               <div className="mb-16 lg:mb-20 animate-in fade-in slide-in-from-bottom-8 duration-1000">
                 <h2 className="text-[clamp(3.2rem,6vw,5.5rem)] font-black leading-[0.9] tracking-tight text-white">
-                  Pequenas<br />
-                  doses.<br />
+                  Pequenas<br />doses.<br />
                   <span className="font-serif italic text-[#FF7A00] font-normal">Grande impacto.</span>
                 </h2>
               </div>
 
-              {/* GRELHA DE SERVIÇOS - EFEITO CASCATA SUAVE */}
               <div className="grid gap-5 md:grid-cols-3 md:gap-6 items-start">
-
-                {/* CARTÃO 01 - PUBLICIDADE */}
                 <div className="group relative flex min-h-[300px] lg:min-h-[320px] flex-col justify-between overflow-hidden rounded-[2rem] bg-white/5 p-6 lg:p-8 backdrop-blur-md border border-white/10 transition-all duration-500 ease-out hover:-translate-y-4 hover:shadow-[0_30px_60px_rgba(0,0,0,0.4)] hover:border-white/30 cursor-pointer animate-in fade-in zoom-in-95 duration-700 delay-100">
-
                   <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#FF7A00] opacity-0 blur-[60px] transition-opacity duration-700 group-hover:opacity-20 pointer-events-none"></div>
-
                   <div className="flex justify-between items-start relative z-10">
                     <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-white shadow-inner transition-all duration-500 group-hover:bg-[#FF7A00] group-hover:scale-110 group-hover:rotate-[10deg]">
                       <Target size={24} strokeWidth={2} />
                     </div>
                     <span className="text-5xl font-black tracking-tighter text-white/10 transition-all duration-500 group-hover:text-white/30 group-hover:-translate-x-2">01</span>
                   </div>
-
                   <div className="relative z-10 mt-8">
                     <h3 className="mb-3 text-2xl font-black text-white tracking-tight">Publicidade</h3>
                     <p className="text-white/60 transition-colors duration-300 group-hover:text-white/90 leading-relaxed text-sm lg:text-base font-medium">
                       Campanhas que param o scroll e tornam a literacia em saúde impossível de ignorar.
                     </p>
                   </div>
-
                   <div className="absolute bottom-0 left-0 h-1.5 w-0 bg-[#FF7A00] transition-all duration-700 ease-out group-hover:w-full"></div>
                 </div>
 
-                {/* CARTÃO 02 - PACK CLÍNICO (Desce ligeiramente 24px) */}
                 <div className="group relative flex min-h-[300px] lg:min-h-[320px] flex-col justify-between overflow-hidden rounded-[2rem] bg-white/5 p-6 lg:p-8 backdrop-blur-md border border-white/10 transition-all duration-500 ease-out hover:-translate-y-4 hover:shadow-[0_30px_60px_rgba(0,0,0,0.4)] hover:border-white/30 cursor-pointer animate-in fade-in zoom-in-95 duration-700 delay-300 md:mt-6">
-
                   <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#FF7A00] opacity-0 blur-[60px] transition-opacity duration-700 group-hover:opacity-20 pointer-events-none"></div>
-
                   <div className="flex justify-between items-start relative z-10">
                     <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-white shadow-inner transition-all duration-500 group-hover:bg-[#FF7A00] group-hover:scale-110 group-hover:rotate-[10deg]">
                       <Boxes size={24} strokeWidth={2} />
                     </div>
                     <span className="text-5xl font-black tracking-tighter text-white/10 transition-all duration-500 group-hover:text-white/30 group-hover:-translate-x-2">02</span>
                   </div>
-
                   <div className="relative z-10 mt-8">
                     <h3 className="mb-3 text-2xl font-black text-white tracking-tight">Pack clínico</h3>
                     <p className="text-white/60 transition-colors duration-300 group-hover:text-white/90 leading-relaxed text-sm lg:text-base font-medium">
                       Materiais claros, rigorosos e prontos para a equipa aplicar no balcão.
                     </p>
                   </div>
-
                   <div className="absolute bottom-0 left-0 h-1.5 w-0 bg-[#FF7A00] transition-all duration-700 ease-out group-hover:w-full"></div>
                 </div>
 
-                {/* CARTÃO 03 - COMUNIDADE (Desce ligeiramente 48px) */}
                 <div className="group relative flex min-h-[300px] lg:min-h-[320px] flex-col justify-between overflow-hidden rounded-[2rem] bg-white/5 p-6 lg:p-8 backdrop-blur-md border border-white/10 transition-all duration-500 ease-out hover:-translate-y-4 hover:shadow-[0_30px_60px_rgba(0,0,0,0.4)] hover:border-white/30 cursor-pointer animate-in fade-in zoom-in-95 duration-700 delay-500 md:mt-12">
-
                   <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#FF7A00] opacity-0 blur-[60px] transition-opacity duration-700 group-hover:opacity-20 pointer-events-none"></div>
-
                   <div className="flex justify-between items-start relative z-10">
                     <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-white shadow-inner transition-all duration-500 group-hover:bg-[#FF7A00] group-hover:scale-110 group-hover:rotate-[10deg]">
                       <HeartPulse size={24} strokeWidth={2} />
                     </div>
                     <span className="text-5xl font-black tracking-tighter text-white/10 transition-all duration-500 group-hover:text-white/30 group-hover:-translate-x-2">03</span>
                   </div>
-
                   <div className="relative z-10 mt-8">
                     <h3 className="mb-3 text-2xl font-black text-white tracking-tight">Comunidade</h3>
                     <p className="text-white/60 transition-colors duration-300 group-hover:text-white/90 leading-relaxed text-sm lg:text-base font-medium">
                       Extensões que levam a conversa para escolas, famílias e território local.
                     </p>
                   </div>
-
                   <div className="absolute bottom-0 left-0 h-1.5 w-0 bg-[#FF7A00] transition-all duration-700 ease-out group-hover:w-full"></div>
                 </div>
 
@@ -292,21 +256,16 @@ export function KapsulaHome() {
             </div>
           </section>
 
-          {/* LOOKBOOK INTERATIVO (Emoldurado: Título -> Grelha -> Conclusão) */}
           <section id="lookbook" className="px-6 pt-12 pb-16 md:px-10 lg:px-16 lg:pt-16 lg:pb-24 bg-[#f4f1e9]">
             <div className="mx-auto max-w-[1400px]">
               
-              {/* HEADER DA SECÇÃO: "Um ano..." + Filtros à direita */}
               <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
-                
-                {/* Canto Superior Esquerdo */}
                 <div className="flex justify-start">
                   <h2 className="text-[clamp(4rem,8vw,7rem)] font-black leading-none tracking-[-0.05em] text-[#6B23CA]">
                     Um ano...
                   </h2>
                 </div>
                 
-                {/* Filtros no Canto Superior Direito */}
                 <div className="flex justify-start md:justify-end">
                   <div className="flex flex-wrap gap-2 md:gap-3 bg-white/60 backdrop-blur-md p-2 rounded-full border border-[#6B23CA]/10 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
                     {filterCategories.map(cat => (
@@ -324,10 +283,8 @@ export function KapsulaHome() {
                     ))}
                   </div>
                 </div>
-                
               </div>
 
-              {/* GRELHA DE CAMPANHAS */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6 relative min-h-[500px]">
                 {campanhasData.map((campanha, index) => {
                   const Meta = campaignMeta[campanha.id] || { icon: Sparkles };
@@ -347,7 +304,6 @@ export function KapsulaHome() {
                       }`}
                       style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}
                     >
-                      {/* Sobreposições e Efeitos */}
                       <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/10 pointer-events-none" />
                       <div 
                         className="absolute inset-0 rounded-[2rem] opacity-0 transition-opacity duration-700 group-hover:opacity-100 pointer-events-none -z-10"
@@ -357,7 +313,6 @@ export function KapsulaHome() {
                         <IconComponent size={220} strokeWidth={1.5} />
                       </div>
                       
-                      {/* Topo do Cartão: mês grande, estilo calendário */}
                       <div className="relative z-10 flex w-full items-center justify-between">
                         <span className="text-5xl md:text-6xl font-black uppercase leading-none tracking-[-0.04em] opacity-40">
                           {campanha.mes}
@@ -370,14 +325,12 @@ export function KapsulaHome() {
                         )}
                       </div>
 
-                      {/* Base do Cartão: categoria + título */}
                       <div className="relative z-10 mt-auto pt-10 pr-10">
-                        <h3 className="text-2xl font-black leading-[1.05] tracking-tight md:text-[1.4rem] drop-shadow-sm">
+                        <h3 className="text-xl font-black leading-[1.05] tracking-tight md:text-[1.35rem] drop-shadow-sm">
                           {campanha.tema}
                         </h3>
                       </div>
 
-                      {/* Seta que indica que o cartão é clicável */}
                       <ArrowUpRight
                         size={24}
                         strokeWidth={2.5}
@@ -388,7 +341,6 @@ export function KapsulaHome() {
                 })}
               </div>
 
-              {/* FOOTER DA SECÇÃO: Canto Inferior Direito após os cartões */}
               <div className="mt-12 md:mt-16 flex justify-end">
                 <h2 className="text-[clamp(3.5rem,7vw,6.5rem)] font-serif font-normal italic leading-none tracking-[-0.05em] text-[#FF7A00] whitespace-nowrap">
                   ...doze campanhas.
@@ -398,21 +350,46 @@ export function KapsulaHome() {
             </div>
           </section>
 
-          {/* CONTACTO & CTA (ESPAÇAMENTO CORRIGIDO E BOTÃO PREMIUM) */}
+          {/* ✨ A EQUIPA (Autores) */}
+          <section id="equipa" className="relative bg-[#6B23CA]/[0.03] px-6 py-16 md:px-10 lg:px-16 text-center border-t-2 border-[#6B23CA]/10">
+            <div className="mx-auto max-w-[1400px] flex flex-col items-center gap-12 md:gap-16">
+              
+              <h2 className="text-[clamp(2.5rem,5vw,3.5rem)] font-black leading-none tracking-tight text-[#6B23CA]">
+                As mentes por trás da <span className="font-serif italic text-[#FF7A00] font-normal">PharmaMedia.</span>
+              </h2>
+              
+              <div className="flex flex-wrap justify-center gap-8 md:gap-14">
+                {[
+                  { nome: 'Guilherme Rocha', cargo: 'Futuro Técnico Auxiliar de Farmácia', img: 'https://api.dicebear.com/7.x/notionists/svg?seed=Guilherme&backgroundColor=6B23CA' },
+                  { nome: 'Marta Costa', cargo: 'Futura Técnica Auxiliar de Farmácia', img: 'https://api.dicebear.com/7.x/notionists/svg?seed=Ana&backgroundColor=FF7A00' },
+                  { nome: 'Matilde Martins', cargo: 'Futura Técnica Auxiliar de Farmácia', img: 'https://api.dicebear.com/7.x/notionists/svg?seed=Joana&backgroundColor=6B23CA' }, // Seed alterada para garantir visual feminino
+                  { nome: 'Sofia Ribeiro', cargo: 'Futura Técnica Auxiliar de Farmácia', img: 'https://api.dicebear.com/7.x/notionists/svg?seed=Sofia&backgroundColor=FF7A00' },
+                ].map((membro, i) => (
+                  <div key={i} className="group flex flex-col items-center gap-4 transition-all duration-300 hover:-translate-y-2">
+                    <div className="h-28 w-28 md:h-32 md:w-32 overflow-hidden rounded-full border-[4px] border-white shadow-[0_10px_20px_rgba(107,35,202,0.1)] transition-all duration-300 group-hover:border-[#FF7A00] group-hover:shadow-[0_15px_30px_rgba(255,122,0,0.25)]">
+                      <img src={membro.img} alt={membro.nome} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="text-base md:text-lg font-black text-[#6B23CA] leading-none">{membro.nome}</span>
+                      <span className="text-[11px] md:text-xs font-semibold text-[#E66A00] max-w-[160px] text-center leading-tight italic">
+                        {membro.cargo}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
           <section id="contacto" className="relative flex min-h-[45vh] lg:min-h-[50vh] flex-col items-center justify-center overflow-hidden bg-[#FF7A00] px-6 py-12 text-center md:px-10 lg:px-16">
-            
-            {/* Luz de fundo central */}
             <div className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white opacity-[0.08] blur-[100px] pointer-events-none transition-all duration-1000"></div>
 
             <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-12 md:gap-16">
-              
-              {/* Título sem encavalitamento (Flexbox com gap) */}
               <h2 className="flex flex-col gap-2 md:gap-4 text-[clamp(3.5rem,8vw,8.5rem)] font-black leading-none tracking-[-0.04em] text-white">
                 <span>Vamos pôr a</span>
                 <span className="font-serif font-normal italic text-[#4C1D95]">saúde a falar?</span>
               </h2>
               
-              {/* Botão Premium (Branco de alto contraste) */}
               <a 
                 href="mailto:ola@pharmamedia.pt" 
                 className="group relative inline-flex items-center justify-center gap-4 overflow-hidden rounded-full bg-white pl-8 pr-2 py-2 text-sm md:text-base font-black uppercase tracking-[0.2em] text-[#6B23CA] shadow-[0_10px_30px_rgba(0,0,0,0.1)] transition-all duration-500 hover:scale-105 hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)]"
@@ -424,18 +401,13 @@ export function KapsulaHome() {
                   <ArrowUpRight className="h-6 w-6" strokeWidth={2.5} />
                 </div>
               </a>
-
             </div>
           </section>
 
-          {/* FOOTER PREMIUM (Margens Y reduzidas) */}
           <footer className="relative bg-[#4C1D95] px-6 py-8 md:px-10 md:py-10 lg:px-16 text-[#f4f1e9] overflow-hidden">
-            {/* Fio de luz no topo do footer */}
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#FF7A00]/50 to-transparent"></div>
 
             <div className="mx-auto max-w-[1400px] flex flex-col md:flex-row justify-between items-start md:items-end gap-8 relative z-10">
-
-              {/* Lado Esquerdo Footer */}
               <div className="flex flex-col gap-3">
                 <span className="text-3xl md:text-4xl font-black tracking-tighter text-white drop-shadow-md">
                   PharmaMedia<span className="text-[#FF7A00]">.</span>
@@ -446,15 +418,12 @@ export function KapsulaHome() {
                 </div>
               </div>
 
-              {/* Lado Direito Footer */}
               <div className="flex flex-col md:text-right gap-3 md:items-end">
                 <span className="text-sm md:text-base font-serif italic text-white/90">Onde o rigor clínico encontra a criatividade.</span>
               </div>
-
             </div>
           </footer>
 
-          {/* BOTÃO FLUTUANTE CONTÍNUO (Foge da caixa de factos e navega até ao fim!) */}
           <div className={`fixed ${activeCampanha ? 'z-40' : 'z-[99]'} transition-all duration-700 ease-in-out ${activeSection === 'top'
               ? `right-8 md:right-12 lg:right-20 ${toastFact
                 ? 'bottom-48 md:bottom-48 lg:bottom-52'
@@ -491,7 +460,6 @@ export function KapsulaHome() {
             </a>
           </div>
 
-          {/* TOAST (FACTOS) */}
           {toastFact && (
             <div className="fixed bottom-8 right-8 z-50 w-80 rounded-2xl border-2 border-[#6B23CA] bg-[#f4f1e9] p-5 shadow-[8px_8px_0_#FF7A00] animate-in slide-in-from-bottom-10 fade-in duration-300">
               <div className="mb-3 flex items-center justify-between">
@@ -504,7 +472,6 @@ export function KapsulaHome() {
             </div>
           )}
 
-          {/* MODAL DA CAMPANHA (BULAS) ISOLADO */}
           {activeCampanha && (
             <CampanhaModal 
               campanha={activeCampanha} 
@@ -513,8 +480,6 @@ export function KapsulaHome() {
           )}
         </main>
       )}
-
-
     </>
   )
 }

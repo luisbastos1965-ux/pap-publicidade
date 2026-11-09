@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { X, Target, TrendingUp, Sparkles, Boxes, Activity, HeartPulse, MessageCircleHeart, Camera, LayoutTemplate, Smartphone, ZoomIn } from 'lucide-react'
-
+import { X, Target, TrendingUp, Sparkles, Boxes, Activity, HeartPulse, MessageCircleHeart, Camera, LayoutTemplate, Smartphone, ZoomIn, Download } from 'lucide-react'
 // =========================================================================
 // COMPONENTE PRINCIPAL: MODAL DA CAMPANHA (VERSÃO AGÊNCIA PREMIUM)
 // =========================================================================
@@ -354,32 +353,32 @@ export function CampanhaModal({ campanha, onClose }: CampanhaModalProps) {
                     <div className="flex flex-col gap-4">
                       
                       {/* O Interruptor Mágico (Segmented Control) */}
-                      <div className="flex justify-end">
-                        <div className="flex bg-black/5 p-1 rounded-[2rem]">
-                          <button
-                            onClick={() => setViewMode('design')}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-[1.5rem] text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${
-                              viewMode === 'design' 
-                                ? 'bg-white shadow-sm text-[#6B23CA]' 
-                                : 'text-black/40 hover:text-black/70'
-                            }`}
-                          >
-                            <LayoutTemplate size={14} strokeWidth={2.5} />
-                            Mockup
-                          </button>
-                          <button
-                            onClick={() => setViewMode('terreno')}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-[1.5rem] text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${
-                              viewMode === 'terreno' 
-                                ? 'bg-[#FF7A00] shadow-[0_4px_12px_rgba(255,122,0,0.3)] text-white scale-[1.02]' 
-                                : 'text-black/40 hover:text-black/70'
-                            }`}
-                          >
-                            <Camera size={14} strokeWidth={2.5} />
-                            Real
-                          </button>
-                        </div>
+                    <div className="flex justify-end">
+                      <div className="flex bg-black/5 p-1 rounded-[2rem]">
+                        <button
+                          onClick={() => setViewMode('design')}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-[1.5rem] text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${
+                            viewMode === 'design' 
+                              ? 'bg-white shadow-sm text-[#6B23CA]' 
+                              : 'text-black/40 hover:text-black/70'
+                          }`}
+                        >
+                          <LayoutTemplate size={14} strokeWidth={2.5} />
+                          Mockup
+                        </button>
+                        <button
+                          onClick={() => setViewMode('terreno')}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-[1.5rem] text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${
+                            viewMode === 'terreno' 
+                              ? 'bg-[#FF7A00] shadow-[0_4px_12px_rgba(255,122,0,0.3)] text-white scale-[1.02]' 
+                              : 'text-black/40 hover:text-black/70'
+                          }`}
+                        >
+                          <Camera size={14} strokeWidth={2.5} />
+                          Real
+                        </button>
                       </div>
+                    </div>
 
                       {/* CAIXA DE IMAGEM ADAPTADA PARA VERTICAL / HORIZONTAL + LIGHTBOX */}
                       <div 
