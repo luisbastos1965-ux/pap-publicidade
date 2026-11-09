@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Kápsula — Rigor que ganha vida',
+  title: 'PharmaMedia',
   description: 'Campanhas de literacia em saúde chave-na-mão para farmácias comunitárias.',
   generator: 'Kápsula',
   icons: {
